@@ -17,7 +17,7 @@ class TestDict(unittest.TestCase):
         self.assertEqual(d.key,'value')
     def test_attr(self):
         d =Dict()
-        d.key = 'value'
+        d['key'] = 'value'
         self.assertTrue('key' in d)
         self.assertEqual(d['key'],'value')
 
@@ -30,6 +30,11 @@ class TestDict(unittest.TestCase):
         with self.assertRaises(AttributeError):
             value = d.empty
 
+    def setUp(self):
+        print('setUp..')
+    def tearDown(self):
+        print('tearDown')
+    
 if __name__=='__main__':
     unittest.main()
 
