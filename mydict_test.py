@@ -17,7 +17,7 @@ class TestDict(unittest.TestCase):
         self.assertEqual(d.key,'value')
     def test_attr(self):
         d =Dict()
-        d['key'] = 'value'
+        d.key = 'value'
         self.assertTrue('key' in d)
         self.assertEqual(d['key'],'value')
 
