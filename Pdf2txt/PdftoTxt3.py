@@ -30,8 +30,10 @@ def convert_pdf_to_txt(path):
     return text
 
 
+#
+
 
 if __name__ =='__main__':
-    fd = open(sys.argv[1],'w')
-    fd.write(convert_pdf_to_txt(sys.argv[2]))
+    fd = open(sys.argv[1],'w') #第一个参数是生成的文件名
+    fd.write(convert_pdf_to_txt(sys.argv[2]))#第二个参数是是打开PDF文件，
     fd.close()
