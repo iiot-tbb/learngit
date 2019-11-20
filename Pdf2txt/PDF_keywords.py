@@ -31,18 +31,14 @@ def convert_pdf_to_txt(path):
     device.close()
     retstr.close()
     return text
-
-
 #
-
-
 def Text_extract_Key(text):
     #text = codecs.open(sys.argv[1],'r',utf-8).read()
     tr4w = TextRank4Keyword()
     tr4w.analyze(text=text,lower = True,window=2)
 
     print('关键词: ')
-    for item in tr4w.get_keywords(20,word_min_len=2):
+    for item in tr4w.get_keywords(20,word_min_len=3):
         print(item.word,item.weight)
 
     print('------------')
@@ -50,13 +46,13 @@ def Text_extract_Key(text):
     for phrase in tr4w.get_keyphrases(keywords_num=20,min_occur_num = 2):
         print(phrase)
 
-    tr4s = TextRank4Sentence()
-    tr4s.analyze(text = text, lower = True, source ='all_filters')
-
-    print('-----------')
-    print('摘要：')
-    for item in tr4s.get_key_sentences(num=3):
-        print(item.index,item.weight,item.sentence)
+#    tr4s = TextRank4Sentence()
+#    tr4s.analyze(text = text, lower = True, source ='all_filters')
+#
+#    print('-----------')
+#    print('摘要：')
+#    for item in tr4s.get_key_sentences(num=3):
+#        print(item.index,item.weight,item.sentence)
 
 if __name__ =='__main__':
     #fd = open(sys.argv[1],'w') #第一个参数是生成的文件名

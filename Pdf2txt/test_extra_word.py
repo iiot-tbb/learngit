@@ -13,14 +13,15 @@ import jieba
 import sys
 from enum import Enum,unique
 from io import StringIO
-
+from youdao import youdaoTranslate
 
 
 class extract_keys:
     def __init__(self):
         self.text = ""
         self.keywords=[]
-        self.initial_tag = {'中文关键词':50,'中文关键字':40,'关键字':20,'关键词':40,'研究方向':500,
+        self.keywords_en = []
+        self.initial_tag = {'中文关键词':50,'中文关键字':50,'关键字':40,'关键词':40,'研究方向':500,
                             '项目名称':20,'研究意义':500,'研究现状':500}
 
     def print_txt(self):
@@ -102,9 +103,9 @@ class extract_keys:
                 lst.remove(i)
         strs=' '.join(lst)
         keywords = tfidf(strs,allowPOS=('n','nr','ns'))
-        print("----tf_idf---------")
+       # print("----tf_idf---------")
         for key in keywords:
-            print(key)
+           # print(key)
             if 2<len(key) <10:
                 self.keywords.append(key)
     
@@ -112,7 +113,7 @@ class extract_keys:
         tag = False
         for (s,v) in self.initial_tag.items():
             #length_key =
-            self.keywords.append("....."+s+".....:")
+           # self.keywords.append("....."+s+".....:")
             pos=self.text.find(s)
             if pos != -1:
                 tag = True
@@ -131,10 +132,24 @@ class extract_keys:
 
 
     def print_keywords(self):
-        print('关键字：')
+        print('英文关键字：---------------')
+        for i in range(len(self.keywords)):
+            word=youdaoTranslate(self.keywords[i].strip(' \n'))
+            if word =='CS':
+                #self.keywords.pop(i)
+                pass
+            else:
+                self.keywords_en.append(word)
+                print(word)
+        #str_sep = "@"
+        #str_key = str_sep.join(self.keywords)
+        #str_after = youdaoTranslate(str_key)
+        #self.keywords_en = str_after.split(str_sep)
+        #for i in self.keywords_en:
+        #    print(i)
+        print('中文关键字：----------------')
         for i in self.keywords:
             print(i)
-
     def rec_as_keys(self): #识别出来关键字从
         new_keywords = []
         
