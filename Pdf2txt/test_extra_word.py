@@ -132,24 +132,25 @@ class extract_keys:
 
 
     def print_keywords(self):
-        print('英文关键字：---------------')
+        #print('英文关键字：---------------')
         for i in range(len(self.keywords)):
             word=youdaoTranslate(self.keywords[i].strip(' \n'))
-            if word =='CS':
+            if word =='CS' or word=='':
                 #self.keywords.pop(i)
                 pass
             else:
                 self.keywords_en.append(word)
-                print(word)
+                #print(word)
         #str_sep = "@"
         #str_key = str_sep.join(self.keywords)
         #str_after = youdaoTranslate(str_key)
         #self.keywords_en = str_after.split(str_sep)
         #for i in self.keywords_en:
         #    print(i)
-        print('中文关键字：----------------')
-        for i in self.keywords:
-            print(i)
+        
+        #print('中文关键字：----------------')
+        #for i in self.keywords:
+        #    print(i)
     def rec_as_keys(self): #识别出来关键字从
         new_keywords = []
         

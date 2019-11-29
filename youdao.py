@@ -9,10 +9,7 @@ appKey = '49ff79007daed96a'
 secretKey = 'X4E7RWzpr984bHJA0PRd1GX18UoDXET7'
  
 def youdaoTranslate(q):
-    if q == None or q == ' ' or q =='\n':
-        return 'CS'
     httpClient = None
-    s =[]
     myurl = '/api'
     fromLang = 'zh-CHS'
     toLang = 'EN'
@@ -28,17 +25,14 @@ def youdaoTranslate(q):
         #response是HTTPResponse对象
         response = httpClient.getresponse()
         s = eval(response.read().decode("utf-8"))['translation']
+        #print(s)
     except Exception as e:
         print(e)
     finally:
         if httpClient:
             httpClient.close()
-    if len(s) != 0:
-        ss = s[0]
-        return ss
-    return "CS"
+    return s
  
 if __name__ == '__main__':
-    ss = youdaoTranslate('智能@@火车#汽车')
-    print(type(ss))
+    ss = youdaoTranslate('关键字')
     print(ss)
