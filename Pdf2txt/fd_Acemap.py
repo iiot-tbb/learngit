@@ -9,7 +9,7 @@ class findyou:
     def __init__(self):
         self.dic = {}
         self.person=[]
-
+        self.personDict={}
     def find_name_byKey(self,key):
         url = 'https://dev.acemap.info/api/v1/thucloud/find-experts-by-domain'
         #data_json = {'condition':'Transmission system'}
@@ -28,14 +28,22 @@ class findyou:
             if self.dic['data']['resultForm'][i]['name'] not in self.person:
                 if name is not None:
                     self.person.append(name)
+                    self.personDict[name] =1
+            else:
+                self.personDict[name]+=1
         for i in range(len(self.person)):
             if len(self.person[i]) == 0:
                 self.person.pop(i)
         #for per in self.person:
         #    print(per)
+
     def print_person(self):
-        for per in self.person:
-            print(per)
+        print('print_person________:')
+        #for per in self.person:
+        #    print(per)
+        #print(self.personDict)
+        test_data = sorted(self.personDict.items(),key = lambda x:x[1],reverse= True)
+        print(test_data)
 if __name__ == '__main__':
     extr = extract_keys()
     extr.Print()

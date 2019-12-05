@@ -14,15 +14,15 @@ import sys
 from enum import Enum,unique
 from io import StringIO
 from youdao import youdaoTranslate
-
-
+import elasticsearch
+from DataBaseConn import database_find_field_name
 class extract_keys:
     def __init__(self):
         self.text = ""
         self.keywords=[]
         self.keywords_en = []
         self.initial_tag = {'中文关键词':50,'中文关键字':50,'关键字':40,'关键词':40,'研究方向':500,
-                            '项目名称':20,'研究意义':500,'研究现状':500}
+                            '项目名称':20,'研究意义':1500,'研究现状':1500,'中文摘要':-1500,'中\n文\n摘\n要':-1500}
 
     def print_txt(self):
         print(self.text)
@@ -76,6 +76,8 @@ class extract_keys:
             elif re.match(r'[a-zA-Z0-9]+',i):
                 lst.remove(i)
         self.text=' '.join(lst)
+        #text_half = int(len(self.text)/4)
+        #print(self.text[:text_half])#.........................打印
         #    else:
         #        print(i)
     def text_processing_text(self):  #测试
@@ -117,13 +119,29 @@ class extract_keys:
             pos=self.text.find(s)
             if pos != -1:
                 tag = True
-                lentxt = pos+len(s)
-                strtp = self.text[lentxt:lentxt+v]
+                if v<0:
+                    lentxt =pos
+                    if pos > -v:
+                        strtp = self.text[lentxt+v:lentxt]
+                    else:
+                        strtp = self.text[:lentxt]
+                else:
+                    lentxt = pos+len(s)
+                    strtp = self.text[lentxt:lentxt+v]
                 #if s is not '研究方向':
                 if '关键' in s:
                     #lst=strtp.split("；")
                     lst=re.split(" |!|\?|\.|;|；",strtp)
                     self.keywords.extend(lst)
+                elif '摘' in s:
+                    #self.translate(strtp)#待完成
+                    #self.extractFromDiscover()#待完成
+                    #self.findInMysql()#待完成
+                    translate_strtp = youdaoTranslate(strtp)
+                    list_essay_id=self.find_essay_id_in_es(translate_strtp)
+                    self.keywords_en.extend(self.find_filed_in_acemap_Database(list_essay_id))
+                    #print(translate_strtp)
+                    #print(list_essay_id)
                 else:
                     self.tf_idf(strtp)
                     self.Stupid_Textrank(strtp)
@@ -140,7 +158,7 @@ class extract_keys:
                 pass
             else:
                 self.keywords_en.append(word)
-                #print(word)
+        #        print(word)
         #str_sep = "@"
         #str_key = str_sep.join(self.keywords)
         #str_after = youdaoTranslate(str_key)
@@ -169,12 +187,29 @@ class extract_keys:
         tr4w.analyze(text = strs ,lower = True,window=2)
         for phrase in tr4w.get_keyphrases(keywords_num=10,min_occur_num =1):
             self.keywords.append(phrase)
-    
+   
+    def find_essay_id_in_es(self,abstract):
+        list_id = []
+        es = elasticsearch.Elasticsearch("10.10.10.10:9200")
+        if es.ping() != True:
+            print("es.ping():",es.ping())
+        query_json = {
+            "query":{
+                "match":{
+                    "title":'\"' + abstract + '\"'
+                }
+            }
+        }
+        query = es.search(index = 'paper',body=query_json,request_timeout=100) #index = 索引或别名
+        for j in query['hits']['hits']:
+            list_id.append(j["_id"])
+        return list_id
+    def find_filed_in_acemap_Database(self,paperId_list):
+        fild_name = database_find_field_name(paperId_list)
+        return fild_name
     def Print(self):
         self.convert_pdf_to_txt(sys.argv[1])
-        #extr.print_txt()
         self.text_processing()
-        #extr.text_processing_text()
         self.find_tags()
         self.rec_as_keys()
         self.print_keywords()
