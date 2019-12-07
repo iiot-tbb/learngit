@@ -16,6 +16,7 @@ from io import StringIO
 from youdao import youdaoTranslate
 import elasticsearch
 from DataBaseConn import database_find_field_name
+from DataBaseConn import database_filtered_chinese
 class extract_keys:
     def __init__(self):
         self.text = ""
@@ -142,6 +143,10 @@ class extract_keys:
                     self.keywords_en.extend(self.find_filed_in_acemap_Database(list_essay_id))
                     #print(translate_strtp)
                     #print(list_essay_id)
+                elif '项目名称' in s:
+                    translate_strtp = youdaoTranslate(strtp)
+                    list_essay_id=self.find_essay_id_in_es(translate_strtp,1)
+                    self.keywords_en.extend(self.find_filed_in_acemap_Database(list_essay_id))
                 else:
                     self.tf_idf(strtp)
                     self.Stupid_Textrank(strtp)
@@ -188,7 +193,7 @@ class extract_keys:
         for phrase in tr4w.get_keyphrases(keywords_num=10,min_occur_num =1):
             self.keywords.append(phrase)
    
-    def find_essay_id_in_es(self,abstract):
+    def find_essay_id_in_es(self,abstract,tag = 0):
         list_id = []
         es = elasticsearch.Elasticsearch("10.10.10.10:9200")
         if es.ping() != True:
@@ -196,13 +201,25 @@ class extract_keys:
         query_json = {
             "query":{
                 "match":{
+                    "abstract":'\"' + abstract + '\"'
+                }
+            }
+        }
+        query_json2 = {
+            "query":{
+                "match":{
                     "title":'\"' + abstract + '\"'
                 }
             }
         }
-        query = es.search(index = 'paper',body=query_json,request_timeout=100) #index = 索引或别名
+        if tag ==0:
+            query = es.search(index = 'paper',filter_path=['hits.hits._id','hits.hits.field.name'],body=query_json,request_timeout=100) #index = 索引或别名
+        elif tag == 1:
+            query = es.search(index = 'paper',body=query_json2,filter_path=['hits.hits._id,hits.hits.field.name'],request_timeout=100) #index = 索引或别名
         for j in query['hits']['hits']:
             list_id.append(j["_id"])
+            #print("\n\n\n\n\n\n\n-------------------------------------query-----------------------\n\n\n\n")
+            #print(query)
         return list_id
     def find_filed_in_acemap_Database(self,paperId_list):
         fild_name = database_find_field_name(paperId_list)

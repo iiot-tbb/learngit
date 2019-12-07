@@ -56,7 +56,51 @@ def database_find_field_name(List_paperId):
     finally:
         connection.close()
         return list_field_name
-if __name__ =='__main__':
-    listp = [257993614,332168020,146298480,287619529,173977416]
-    li=database_find_filed_name(listp)
+
+
+def database_filtered_chinese(list_raw):
+    affil_id =[]
+    author_contr ={}
+    config = {
+        'host':'202.120.36.29',
+        'port':13306,
+        'user':'readonly',
+        'password':'readonly',
+        'db':'am_paper',
     
+    }
+    connection = pymysql.connect(**config)
+    #sql = "select author_id from am_author where name = '%s' or NormalizedName = '%s'"
+    sql2 ="select last_known_affiliation_id,name from am_author where author_id ='%d'"
+    sql3 = "select country_id from am_affiliation where affiliation_id = %d"
+    
+    try:
+        with connection.cursor() as cursor:
+            for name_id in list_raw:#list_raw的每一个元素为（author_id,author_name）元组
+                cursor.execute(sql2%int(name_id[0]))
+                for row in cursor.fetchall():
+                    if row[0]!=0:
+                        print(row[1])
+                        affil_id.append((name_id,row[0]))
+            #print(affil_id)
+            for afiId in affil_id:
+                cursor.execute(sql3%afiId[1])
+                #print((sql3%afiId[1]))
+                for row in cursor.fetchall():
+                    if row[0]==2140066376 or row[0] ==2140082755 or row[0]==2140684314 or row[0]==2140705156 or row[0]==2140778575 :#中国，中国香港，中国台湾，中国澳门,新加坡
+                    	author_contr[afiId[0]]=row[0]
+                    #print(row)
+        #print(author_contr)
+        connection.commit()
+    finally:
+        connection.close()
+        return author_contr  #返回包含key=author_id，value=countryid的字典
+    
+
+if __name__ =='__main__':
+    #listp = [257993614,332168020,146298480,287619529,173977416]
+    #li=database_find_filed_name(listp)
+
+    list_author=[1000000310,1000000285,1000000378]
+    database_filtered_chinese(list_author)
+
